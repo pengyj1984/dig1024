@@ -50,7 +50,7 @@ namespace _567 {
 		return TimePointToEpoch10m(NowTimePoint());
 	}
 	
-	// 得到当前时间点的 epoch 微妙
+	// 得到当前时间点的 epoch 微秒
 	inline int64_t NowEpochMicroseconds() noexcept {
         return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 	}

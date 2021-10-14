@@ -54,40 +54,43 @@ std::ostream& operator << (std::ostream& dest, __uint128_t value){
     return dest;
 }
 
+namespace _567{
+
 // 从标准Console窗口接收一个 int128
-inline __int128_t read(){
-    __int128_t x = 0, f = 1;
-    char ch = getchar();
-    while (ch < '0' || ch > '9'){
-        if (ch == '-') f = -1;
-        ch = getchar();
+    inline __int128_t read(){
+        __int128_t x = 0, f = 1;
+        char ch = getchar();
+        while (ch < '0' || ch > '9'){
+            if (ch == '-') f = -1;
+            ch = getchar();
+        }
+        while (ch >= '0' && ch <= '9'){
+            x = x * 10 + (ch - '0');
+            ch = getchar();
+        }
+        return x * f;
     }
-    while (ch >= '0' && ch <= '9'){
-        x = x * 10 + (ch - '0');
-        ch = getchar();
-    }
-    return x * f;
-}
 
 // 解析字符串为 int128, 不考虑符号问题
-inline __uint128_t parseFromCString(const char* str, int len){
-    __uint128_t x = 0;
-    int i = 0;
-    for (int i = 0; i < len; ++i){
-        char ch = str[i];
-        if (ch >= '0' && ch <= '9'){
-            x = x * 10 + (ch - '0');
+    inline __int128_t parseFromCString(const char* str, int len){
+        __int128_t x = 0;
+        int i = 0;
+        for (int i = 0; i < len; ++i){
+            char ch = str[i];
+            if (ch >= '0' && ch <= '9'){
+                x = x * 10 + (ch - '0');
+            }
         }
+        return x;
     }
-    return x;
-}
 
 // 输出int128到Console
-inline void write(__int128_t x){
-    if (x < 0){
-        putchar('-');
-        x = -x;
+    inline void write(__int128_t x){
+        if (x < 0){
+            putchar('-');
+            x = -x;
+        }
+        if (x > 9) write(x / 10);
+        putchar(x % 10 + '0');
     }
-    if (x > 9) write(x / 10);
-    putchar(x % 10 + '0');
 }

@@ -9,6 +9,8 @@
 #include "567_signal.h"
 #include "567_threadpool.h"
 
+const std::string token = "62b11c372bbf05ffeda21dc10bd51bc2";
+
 // 一次固定处理的原始数据条数
 const int handleSize = 256;
 
@@ -25,11 +27,11 @@ void HandleSourceData(std::vector<std::string> *lines){
         auto temp = (*lines)[i];
         SourceData src;
         ajson::load_from_buff(src, temp.c_str(), temp.size());
-        __uint128_t locationNumber = parseFromCString(src.locationid.c_str(), src.locationid.size());
-        __uint128_t magicNumber = parseFromCString(src.magic.c_str(), src.magic.size());
+        __int128_t locationNumber = _567::parseFromCString(src.locationid.c_str(), src.locationid.size());
+        __int128_t magicNumber = _567::parseFromCString(src.magic.c_str(), src.magic.size());
 
         if (locationNumber > magicNumber){
-            if (locationNumber - 1024 == magicNumber){
+            if (locationNumber + (-1024) == magicNumber){
                 auto&& data = new RealData(src.locationid, magicNumber);
                 datas->push_back(data);
                 continue;
@@ -75,7 +77,7 @@ void HandleSourceData(std::vector<std::string> *lines){
 int main(int argc, char const *argv[]){
     // 禁掉 SIGPIPE 信号避免因为连接关闭出错
     _567::IgnoreSignal();
-    auto&& pool = std::make_shared<_567::ThreadPool<void>>(4);
+    auto&& pool = std::make_shared<_567::ThreadPool<void>>(2);
 
     auto currentMS = _567::NowMicroseconds();
 

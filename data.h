@@ -13,9 +13,9 @@ AJSON(SourceData, locationid, magic);
 
 // 解析后的数据
 struct RealData{
-    RealData(const std::string &_locationid, const __uint128_t &_magic);
+    RealData(const std::string &_locationid, const __int128_t &_magic);
     std::string locationid;
-    __uint128_t magic;
+    __int128_t magic;
 };
 
-RealData::RealData(const std::string &_locationid, const __uint128_t &_magic):locationid(_locationid), magic(_magic){}
+RealData::RealData(const std::string &_locationid, const __int128_t &_magic):locationid(_locationid), magic(_magic){}

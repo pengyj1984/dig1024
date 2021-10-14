@@ -13,4 +13,4 @@ add_executable(dig1024
 )
 
 #target_link_libraries(dig1024 absl::strings absl::numeric)
-target_link_libraries(dig1024 pthread)
+target_link_libraries(dig1024 pthread curl)

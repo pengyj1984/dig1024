@@ -19,3 +19,40 @@ struct RealData{
 };
 
 RealData::RealData(const std::string &_locationid, const __int128_t &_magic):locationid(_locationid), magic(_magic){}
+
+// 挖宝验证数据结构
+struct DigData{
+    DigData(const std::string &_locationid, const std::string &_token);
+    std::string locationid;
+    std::string token;
+};
+
+DigData::DigData(const std::string &_locationid, const std::string &_token):locationid(_locationid), token(_token){}
+
+AJSON(DigData, locationid, token);
+
+// 挖宝返回数据结构
+struct DigResult{
+    int errorno;
+    std::string msg;
+};
+
+AJSON(DigResult, errorno, msg);
+
+// 公式验证数据结构
+struct FormulaData{
+    FormulaData(const std::string &_formula, const std::string &_token);
+    std::string formula;
+    std::string token;
+};
+
+FormulaData::FormulaData(const std::string &_formula, const std::string &_token):formula(_formula), token(_token){}
+
+AJSON(FormulaData, formula, token);
+
+// 公式返回数据结构
+struct FormulaResult{
+    int errorno;
+};
+
+AJSON(FormulaResult, errorno);

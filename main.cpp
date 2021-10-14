@@ -103,6 +103,7 @@ int main(int argc, char const *argv[]){
         }
     }
     if (lines->size() > 0){
+        //HandleSourceData(lines);
         pool->Add([lines](){
             HandleSourceData(lines);
         });

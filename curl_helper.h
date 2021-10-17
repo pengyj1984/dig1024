@@ -17,6 +17,10 @@ inline int PostDig(const std::string &locationId){
     DigData data(locationId, token);
     std::stringstream ss;
     ajson::save_to(ss, data);
+
+    char szJsonData[128];
+    memset(szJsonData, 0, sizeof(szJsonData));
+    strcpy(szJsonData, ss.str().c_str());
     CURLcode ret;
 
     CURL *pCURL = curl_easy_init();
@@ -29,10 +33,10 @@ inline int PostDig(const std::string &locationId){
     ret = curl_easy_setopt(pCURL, CURLOPT_URL, dig.c_str());
     ret = curl_easy_setopt(pCURL, CURLOPT_POST, 1L);
 
-    headers = curl_slist_append(headers, "application/json");
+    headers = curl_slist_append(headers, "content-type:application/json");
     ret = curl_easy_setopt(pCURL, CURLOPT_HTTPHEADER, headers);
 
-    ret = curl_easy_setopt(pCURL, CURLOPT_POSTFIELDS, ss.str().c_str());
+    ret = curl_easy_setopt(pCURL, CURLOPT_POSTFIELDS, szJsonData);
 
     ret = curl_easy_setopt(pCURL, CURLOPT_TIMEOUT, 1);
 

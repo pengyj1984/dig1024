@@ -37,6 +37,7 @@ void HandleSourceData(MemChunk *chunk){
             if (locationNumber + (-1024) == magicNumber){
                 auto&& data = new RealData(src.locationid, magicNumber);
                 datas->push_back(data);
+                //std::cout << src.locationid << ": " << locationNumber << " - " << magicNumber << std::endl;
                 if (PostDig(src.locationid) == 0){
                     passCount++;
                 }
@@ -46,6 +47,7 @@ void HandleSourceData(MemChunk *chunk){
             if ((locationNumber & 1023) == magicNumber){
                 auto&& data = new RealData(src.locationid, magicNumber);
                 datas->push_back(data);
+                //std::cout << src.locationid << ": " << locationNumber << " % " << magicNumber << std::endl;
                 if (PostDig(src.locationid) == 0){
                     passCount++;
                 }
@@ -56,6 +58,7 @@ void HandleSourceData(MemChunk *chunk){
             if (locationNumber + 1024 == magicNumber){
                 auto&& data = new RealData(src.locationid, magicNumber);
                 datas->push_back(data);
+                //std::cout << src.locationid << ": " << locationNumber << " + " << magicNumber << std::endl;
                 if (PostDig(src.locationid) == 0){
                     passCount++;
                 }
@@ -65,6 +68,7 @@ void HandleSourceData(MemChunk *chunk){
             if ((locationNumber << 10) == magicNumber){
                 auto&& data = new RealData(src.locationid, magicNumber);
                 datas->push_back(data);
+                //std::cout << src.locationid << ": " << locationNumber << " * " << magicNumber << std::endl;
                 if (PostDig(src.locationid) == 0){
                     passCount++;
                 }
@@ -149,7 +153,8 @@ int main(int argc, char const *argv[]){
             });
         }
         ifstream.close();
-        usleep(500);           // 休眠500微秒(0.5毫秒)
+        std::cout << file << " completed." << std::endl;
+        usleep(100000);           // 休眠100000微秒(100毫秒)
     }
 
     while (pool->JobsCount() > 0){

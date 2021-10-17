@@ -29,7 +29,7 @@ void HandleSourceData(MemChunk *chunk){
     for (int i = 0; i < size; ++i){
         auto temp = chunk->datas[i];
         SourceData src;
-        ajson::load_from_buff(src, &temp.buffer[0], temp.size);
+        ajson::load_from_buff(src, temp.buffer, temp.size);
         __int128_t locationNumber = _567::parseFromCString(src.locationid.c_str(), src.locationid.size());
         __int128_t magicNumber = _567::parseFromCString(src.magic.c_str(), src.magic.size());
 
@@ -76,17 +76,10 @@ void HandleSourceData(MemChunk *chunk){
     {
         std::scoped_lock<std::mutex> g(settleMutex);
         totalCount += passCount;
-        if (datas->size() > 0)
-            realDatas->insert(realDatas->end(), datas->begin(), datas->end() - 1);
+        if (datas->size() > 0){
+            realDatas->insert(realDatas->end(), datas->begin(), datas->end());
+        }
     }
-    ///////
-//    totalCount += datas->size();
-//    if (datas->size() > 0){
-//        std::cout << "find " << totalCount << " datas in " << totalLines << " lines."<< std::endl;
-//    }
-//    for (int i = 0; i < datas->size(); ++i){
-//        delete (*datas)[i];
-//    }
     delete datas;
     memPool->Free(chunk);
 }
@@ -126,48 +119,48 @@ int main(int argc, char const *argv[]){
 //    }
 
     // test 8 files
-//    for (int i = 0; i < 8; ++i){
-//        file = "./Treasure_" + std::to_string(i) + ".data";
-//        std::ifstream ifstream(file);
-//        if (!ifstream.is_open()){
-//            std::cout << "file open failed." << std::endl;
-//            return -1;
-//        }
-//        std::string temp;
-//        auto&& chunk = memPool->Alloc();
-//        while (getline(ifstream, temp)){
-//            auto&& data = chunk->datas[chunk->size];
-//            data.size = temp.size();
-//            memcpy(data.buffer, temp.c_str(), data.size);
-//            chunk->size++;
-//            ++totalLines;
-//            if (chunk->size >= MAXCHUNKSIZE){
-//                //HandleSourceData(lines);
-//                pool->Add([chunk](){
-//                    HandleSourceData(chunk);
-//                });
-//                chunk = memPool->Alloc();
-//            }
-//        }
-//        if (chunk->size > 0){
-//            //HandleSourceData(lines);
-//            pool->Add([chunk](){
-//                HandleSourceData(chunk);
-//            });
-//        }
-//        ifstream.close();
-//        usleep(500);           // 休眠500微秒(0.5毫秒)
-//    }
+    for (int i = 0; i < 8; ++i){
+        file = "./Treasure_" + std::to_string(i) + ".data";
+        std::ifstream ifstream(file);
+        if (!ifstream.is_open()){
+            std::cout << "file open failed." << std::endl;
+            return -1;
+        }
+        std::string temp;
+        auto&& chunk = memPool->Alloc();
+        while (getline(ifstream, temp)){
+            auto&& data = chunk->datas[chunk->size];
+            data.size = temp.size();
+            memcpy(data.buffer, temp.c_str(), data.size);
+            chunk->size++;
+            ++totalLines;
+            if (chunk->size >= MAXCHUNKSIZE){
+                //HandleSourceData(lines);
+                pool->Add([chunk](){
+                    HandleSourceData(chunk);
+                });
+                chunk = memPool->Alloc();
+            }
+        }
+        if (chunk->size > 0){
+            //HandleSourceData(lines);
+            pool->Add([chunk](){
+                HandleSourceData(chunk);
+            });
+        }
+        ifstream.close();
+        usleep(500);           // 休眠500微秒(0.5毫秒)
+    }
 
     while (pool->JobsCount() > 0){
         usleep(2000);           // 休眠2000微秒(2毫秒)
     }
 
-////    ajson::save_to(ss, data);
-////    std::cout << "json: " << ss.str() << std::endl;
-    auto ret = PostDig("01mq1k08v4qxl8f8yy9677oup67klu3ydzhr7xixqdbmcaz3lfwdkk04dl58fk8d");
+    // 寻找公式
 
-    std::cout << "find " << totalCount << " datas in " << totalLines << " lines." << std::endl;
+
+    std::cout << "find " << realDatas->size() << " datas in " << totalLines << " lines." << std::endl;
+    std::cout << "final score: " << totalCount << std::endl;
 
     auto afterMS = _567::NowMicroseconds();
     auto diff = afterMS - startMS;

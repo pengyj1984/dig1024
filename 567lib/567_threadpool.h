@@ -21,6 +21,8 @@ namespace _567 {
         std::condition_variable cond;
         bool stop = false;
 
+        int runningJobs = 0;
+
     public:
         explicit ThreadPool(int const &numThreads = 4) {
             for (int i = 0; i < numThreads; ++i) {
@@ -35,8 +37,13 @@ namespace _567 {
                             if (this->stop && this->jobs.empty()) return;
                             job = std::move(this->jobs.front());
                             this->jobs.pop();
+                            runningJobs++;
                         }
                         job();
+                        {
+                            std::unique_lock<std::mutex> lock(this->mtx);
+                            runningJobs--;
+                        }
                     }
                 });
             }
@@ -53,7 +60,7 @@ namespace _567 {
         }
 
         size_t JobsCount(){
-            return jobs.size();
+            return jobs.size() + runningJobs;
         }
 
         ~ThreadPool() {

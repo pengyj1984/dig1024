@@ -46,8 +46,9 @@ inline int PostDig(const std::string &locationId){
     curl_easy_cleanup(pCURL);
 
     if (ret == CURLE_OK){
-        std::cout << response << std::endl;
-        return 0;
+        DigResult result;
+        ajson::load_from_buff(result, response.c_str(), response.size());
+        return result.errorno;
     }
 
     return 1;

@@ -154,7 +154,7 @@ int main(int argc, char const *argv[]){
         }
         ifstream.close();
         std::cout << file << " completed." << std::endl;
-        usleep(100000);           // 休眠100000微秒(100毫秒)
+        usleep(200000);           // 休眠200000微秒(200毫秒)
     }
 
     while (pool->JobsCount() > 0){

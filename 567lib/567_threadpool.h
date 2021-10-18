@@ -34,7 +34,10 @@ namespace _567 {
                     CPU_ZERO(&mask);                // 初始化set集，将set置为空
                     CPU_SET(cpu, &mask);
                     if (sched_setaffinity(0, sizeof(cpu_set_t), &mask) == -1){
-                        std::cout << "Bind this thread to cpu " << cpu << " failed." << std::endl;
+                        std::cout << "Bind thread to cpu " << cpu << " failed." << std::endl;
+                    }
+                    else{
+                        std::cout << "Bind thread to cpu " << cpu << std::endl;
                     }
                     while (true) {
                         JT job;
@@ -68,7 +71,7 @@ namespace _567 {
             return 0;
         }
 
-        size_t JobsCount(){
+        size_t JobsCount() const {
             return jobs.size() + runningJobs;
         }
 

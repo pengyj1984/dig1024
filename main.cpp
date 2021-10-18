@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <mutex>
 #include <unistd.h>
 #include <string.h>
@@ -97,11 +98,14 @@ int main(int argc, char const *argv[]){
     if (sched_setaffinity(0, sizeof(cpu_set_t), &mask) == -1){
         std::cout << "Bind main thread to cpu 0 failed." << std::endl;
     }
+    else{
+        std::cout << "Bind main thread to cpu 0." << std::endl;
+    }
 
     // 禁掉 SIGPIPE 信号避免因为连接关闭出错
     _567::IgnoreSignal();
     // 初始化线程池
-    auto&& pool = std::make_shared<_567::ThreadPool<void>>(2);
+    auto&& pool = std::make_shared<_567::ThreadPool<void>>(4);
 
     // 初始化内存池
     memPool = new MemPool();
@@ -111,58 +115,170 @@ int main(int argc, char const *argv[]){
     // 从四个起点开始沿不同方向遍历所有文件
     int startPoint0 = 31, startPoint1 = 32, startPoint2 = 95, startPoint3 = 96;
     std::string file;
-//    for (int offset = 0; offset < 32; ++offset){
-//        int idx = startPoint0 - offset;
-//        file = "./Treasure_" + std::to_string(idx) + ".data";
-//        std::cout << file << std::endl;
-//
-//        idx = startPoint1 + offset;
-//        file = "./Treasure_" + std::to_string(idx) + ".data";
-//        std::cout << file << std::endl;
-//
-//        idx = startPoint2 - offset;
-//        file = "./Treasure_" + std::to_string(idx) + ".data";
-//        std::cout << file << std::endl;
-//
-//        idx = startPoint3 + offset;
-//        file = "./Treasure_" + std::to_string(idx) + ".data";
-//        std::cout << file << std::endl;
-//    }
-
-    // test 1 files
-    for (int i = 0; i < 1; ++i){
-        file = "./Treasure_" + std::to_string(i) + ".data";
-        std::ifstream ifstream(file);
-        if (!ifstream.is_open()){
-            std::cout << "file open failed." << std::endl;
-            return -1;
-        }
-        std::string temp;
-        auto&& chunk = memPool->Alloc();
-        while (getline(ifstream, temp)){
-            auto&& data = chunk->datas[chunk->size];
-            data.size = temp.size();
-            memcpy(data.buffer, temp.c_str(), data.size);
-            chunk->size++;
-            ++totalLines;
-            if (chunk->size >= MAXCHUNKSIZE){
-                //HandleSourceData(lines);
+    for (int offset = 0; offset < 32; ++offset){
+        int idx = startPoint0 - offset;
+        file = "./Treasure_" + std::to_string(idx) + ".data";
+        std::ifstream ifstream0(file);
+        if (ifstream0.is_open()){
+            std::string temp;
+            auto&& chunk = memPool->Alloc();
+            while (getline(ifstream0, temp)){
+                auto&& data = chunk->datas[chunk->size];
+                data.size = temp.size();
+                memcpy(data.buffer, temp.c_str(), data.size);
+                chunk->size++;
+                ++totalLines;
+                if (chunk->size >= MAXCHUNKSIZE){
+                    pool->Add([chunk](){
+                        HandleSourceData(chunk);
+                    });
+                    chunk = memPool->Alloc();
+                }
+            }
+            if (chunk->size > 0){
                 pool->Add([chunk](){
                     HandleSourceData(chunk);
                 });
-                chunk = memPool->Alloc();
             }
+            ifstream0.close();
+            std::cout << file << " completed." << std::endl;
+            usleep(500000);           // 休眠500000微秒(500毫秒)
         }
-        if (chunk->size > 0){
-            //HandleSourceData(lines);
-            pool->Add([chunk](){
-                HandleSourceData(chunk);
-            });
+        else{
+            std::cout << "File " << file << " open failed." << std::endl;
         }
-        ifstream.close();
-        std::cout << file << " completed." << std::endl;
-        usleep(500000);           // 休眠500000微秒(500毫秒)
+
+        idx = startPoint1 + offset;
+        file = "./Treasure_" + std::to_string(idx) + ".data";
+        std::ifstream ifstream1(file);
+        if (ifstream1.is_open()){
+            std::string temp;
+            auto&& chunk = memPool->Alloc();
+            while (getline(ifstream1, temp)){
+                auto&& data = chunk->datas[chunk->size];
+                data.size = temp.size();
+                memcpy(data.buffer, temp.c_str(), data.size);
+                chunk->size++;
+                ++totalLines;
+                if (chunk->size >= MAXCHUNKSIZE){
+                    pool->Add([chunk](){
+                        HandleSourceData(chunk);
+                    });
+                    chunk = memPool->Alloc();
+                }
+            }
+            if (chunk->size > 0){
+                pool->Add([chunk](){
+                    HandleSourceData(chunk);
+                });
+            }
+            ifstream1.close();
+            std::cout << file << " completed." << std::endl;
+            usleep(500000);           // 休眠500000微秒(500毫秒)
+        }
+        else{
+            std::cout << "File " << file << " open failed." << std::endl;
+        }
+
+        idx = startPoint2 - offset;
+        file = "./Treasure_" + std::to_string(idx) + ".data";
+        std::ifstream ifstream2(file);
+        if (ifstream2.is_open()){
+            std::string temp;
+            auto&& chunk = memPool->Alloc();
+            while (getline(ifstream2, temp)){
+                auto&& data = chunk->datas[chunk->size];
+                data.size = temp.size();
+                memcpy(data.buffer, temp.c_str(), data.size);
+                chunk->size++;
+                ++totalLines;
+                if (chunk->size >= MAXCHUNKSIZE){
+                    pool->Add([chunk](){
+                        HandleSourceData(chunk);
+                    });
+                    chunk = memPool->Alloc();
+                }
+            }
+            if (chunk->size > 0){
+                pool->Add([chunk](){
+                    HandleSourceData(chunk);
+                });
+            }
+            ifstream2.close();
+            std::cout << file << " completed." << std::endl;
+            usleep(500000);           // 休眠500000微秒(500毫秒)
+        }
+        else{
+            std::cout << "File " << file << " open failed." << std::endl;
+        }
+
+        idx = startPoint3 + offset;
+        file = "./Treasure_" + std::to_string(idx) + ".data";
+        std::ifstream ifstream3(file);
+        if (ifstream3.is_open()){
+            std::string temp;
+            auto&& chunk = memPool->Alloc();
+            while (getline(ifstream3, temp)){
+                auto&& data = chunk->datas[chunk->size];
+                data.size = temp.size();
+                memcpy(data.buffer, temp.c_str(), data.size);
+                chunk->size++;
+                ++totalLines;
+                if (chunk->size >= MAXCHUNKSIZE){
+                    pool->Add([chunk](){
+                        HandleSourceData(chunk);
+                    });
+                    chunk = memPool->Alloc();
+                }
+            }
+            if (chunk->size > 0){
+                pool->Add([chunk](){
+                    HandleSourceData(chunk);
+                });
+            }
+            ifstream3.close();
+            std::cout << file << " completed." << std::endl;
+            usleep(500000);           // 休眠500000微秒(500毫秒)
+        }
+        else{
+            std::cout << "File " << file << " open failed." << std::endl;
+        }
     }
+
+    // test 8 files
+//    for (int i = 0; i < 8; ++i){
+//        file = "./Treasure_" + std::to_string(i) + ".data";
+//        std::ifstream ifstream(file);
+//        if (!ifstream.is_open()){
+//            std::cout << "file open failed." << std::endl;
+//            return -1;
+//        }
+//        std::string temp;
+//        auto&& chunk = memPool->Alloc();
+//        while (getline(ifstream, temp)){
+//            auto&& data = chunk->datas[chunk->size];
+//            data.size = temp.size();
+//            memcpy(data.buffer, temp.c_str(), data.size);
+//            chunk->size++;
+//            ++totalLines;
+//            if (chunk->size >= MAXCHUNKSIZE){
+//                //HandleSourceData(lines);
+//                pool->Add([chunk](){
+//                    HandleSourceData(chunk);
+//                });
+//                chunk = memPool->Alloc();
+//            }
+//        }
+//        if (chunk->size > 0){
+//            //HandleSourceData(lines);
+//            pool->Add([chunk](){
+//                HandleSourceData(chunk);
+//            });
+//        }
+//        ifstream.close();
+//        std::cout << file << " completed." << std::endl;
+//        usleep(500000);           // 休眠500000微秒(500毫秒)
+//    }
 
     while (pool->JobsCount() > 0){
         usleep(500000);           // 休眠500000微秒(500毫秒)

@@ -4,7 +4,7 @@
 #include <vector>
 
 #define MAXDATASIZE 128
-#define MAXCHUNKSIZE 512
+#define MAXCHUNKSIZE 1024
 #define INITPOOLSIZE 2048
 
 struct MemData{

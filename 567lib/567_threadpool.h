@@ -7,6 +7,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <functional>
+#include <sched.h>
 
 namespace _567 {
 
@@ -25,8 +26,16 @@ namespace _567 {
 
     public:
         explicit ThreadPool(int const &numThreads = 4) {
+            int cpus = sysconf(_SC_NPROCESSORS_ONLN);       // 获取当前设备cpu数量
             for (int i = 0; i < numThreads; ++i) {
-                threads.emplace_back([this] {
+                int cpu = i % cpus;
+                threads.emplace_back([this, cpu] {
+                    cpu_set_t mask;
+                    CPU_ZERO(&mask);                // 初始化set集，将set置为空
+                    CPU_SET(cpu, &mask);
+                    if (sched_setaffinity(0, sizeof(cpu_set_t), &mask) == -1){
+                        std::cout << "Bind this thread to cpu " << cpu << " failed." << std::endl;
+                    }
                     while (true) {
                         JT job;
                         {

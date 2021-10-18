@@ -91,10 +91,17 @@ void HandleSourceData(MemChunk *chunk){
 int main(int argc, char const *argv[]){
     auto startMS = _567::NowMicroseconds();
 
+    cpu_set_t mask;
+    CPU_ZERO(&mask);                // 初始化set集，将set置为空
+    CPU_SET(0, &mask);
+    if (sched_setaffinity(0, sizeof(cpu_set_t), &mask) == -1){
+        std::cout << "Bind main thread to cpu 0 failed." << std::endl;
+    }
+
     // 禁掉 SIGPIPE 信号避免因为连接关闭出错
     _567::IgnoreSignal();
     // 初始化线程池
-    auto&& pool = std::make_shared<_567::ThreadPool<void>>(4);
+    auto&& pool = std::make_shared<_567::ThreadPool<void>>(2);
 
     // 初始化内存池
     memPool = new MemPool();
@@ -122,8 +129,8 @@ int main(int argc, char const *argv[]){
 //        std::cout << file << std::endl;
 //    }
 
-    // test 8 files
-    for (int i = 0; i < 8; ++i){
+    // test 1 files
+    for (int i = 0; i < 1; ++i){
         file = "./Treasure_" + std::to_string(i) + ".data";
         std::ifstream ifstream(file);
         if (!ifstream.is_open()){
@@ -154,11 +161,11 @@ int main(int argc, char const *argv[]){
         }
         ifstream.close();
         std::cout << file << " completed." << std::endl;
-        usleep(200000);           // 休眠200000微秒(200毫秒)
+        usleep(500000);           // 休眠500000微秒(500毫秒)
     }
 
     while (pool->JobsCount() > 0){
-        usleep(2000);           // 休眠2000微秒(2毫秒)
+        usleep(500000);           // 休眠500000微秒(500毫秒)
     }
 
     // 寻找公式

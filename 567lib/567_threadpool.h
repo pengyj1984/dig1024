@@ -26,8 +26,9 @@ namespace _567 {
 
     public:
         explicit ThreadPool(int const &numThreads = 4) {
+            int i = 0;
             int cpus = sysconf(_SC_NPROCESSORS_ONLN);       // 获取当前设备cpu数量
-            for (int i = 0; i < numThreads; ++i) {
+            for ( ; i < numThreads; ++i) {
                 int cpu = i % cpus;
                 threads.emplace_back([this, cpu] {
                     cpu_set_t mask;
@@ -86,7 +87,6 @@ namespace _567 {
             }
         }
     };
-
 
     // 带执行环境的版本
     template<typename Env, size_t numThreads>

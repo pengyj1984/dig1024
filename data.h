@@ -53,6 +53,7 @@ AJSON(FormulaData, formula, token);
 // 公式返回数据结构
 struct FormulaResult{
     int errorno;
+    std::vector<std::string> data;
 };
 
-AJSON(FormulaResult, errorno);
+AJSON(FormulaResult, errorno, data);

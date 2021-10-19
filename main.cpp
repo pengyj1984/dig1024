@@ -17,6 +17,10 @@ std::mutex settleMutex;
 
 MemPool *memPool;
 
+bool stopFormula = false;
+bool stopped = false;
+
+int formulaScore = 0;
 int totalCount = 0;
 int totalLines = 0;
 std::vector<RealData*> *realDatas;
@@ -89,6 +93,229 @@ void HandleSourceData(MemChunk *chunk){
     memPool->Free(chunk);
 }
 
+void FindFormula(){
+    auto index = 0;
+    __int128_t currNumber = 0;
+    int num = 0;
+    std::string currFormula, realFormula, resultFormula;
+    STARTSEARCH:
+    // 因为后面计算的时候是两个两个取出来算的, 这里如果正常判断最后可能会死循环
+    if (index >= realDatas->size())
+    {
+        if (stopFormula) {
+            return;
+        }
+        usleep(1000000);                // 睡１秒
+    }
+
+    while (index < realDatas->size() - 1){
+        std::cout << "currNumber = " << currNumber << std::endl;
+        auto data0 = (*realDatas)[index];
+        if (data0->magic == 0){
+            // 以防万一
+            ++index;
+            continue;
+        }
+
+        if (data0->magic + currNumber <= 1024){
+            ++num;
+            ++index;
+            currNumber += data0->magic;
+            currFormula.append(data0->locationid);
+
+            realFormula.append(_567::writeToString(data0->magic));
+
+            resultFormula.append(_567::writeToString(data0->magic));
+            if (currNumber == 1024 && num >= 4){
+                std::cout << "curr formula = " << currFormula << std::endl;
+
+                std::cout << "real formula = " << realFormula << std::endl;
+
+                std::cout << "result formula = " << resultFormula << std::endl;
+                if (PostFormula(formula) == 0){
+                    formulaScore += (num * num);
+                }
+                // 不管什么结果, 之前的全部不用了
+                num = 0;
+                currFormula.clear();
+                realFormula.clear();
+                resultFormula.clear();
+                currNumber = 0;
+            }
+            else{
+                currFormula.append(" + ");
+
+                realFormula.append(" + ");
+
+                resultFormula.append(" + ");
+            }
+            continue;
+        }
+
+        auto data1 = (*realDatas)[index + 1];
+        if (data1->magic == 0){
+            // 以防万一
+            index += 2;
+            continue;
+        }
+
+        if(data1->magic + currNumber <= 1024){
+            ++num;
+            index += 2;             // 直接跳到后面一个去
+            currNumber += data1->magic;
+            currFormula.append(data1->locationid);
+
+            realFormula.append(_567::writeToString(data1->magic));
+
+            resultFormula.append(_567::writeToString(data1->magic));
+            if (currNumber == 1024 && num >= 4){
+                std::cout << "curr formula = " << currFormula << std::endl;
+
+                std::cout << "real formula = " << realFormula << std::endl;
+
+                std::cout << "result formula = " << resultFormula << std::endl;
+                if (PostFormula(formula) == 0){
+                    formulaScore += (num * num);
+                }
+                // 不管什么结果, 之前的全部不用了
+                num = 0;
+                currFormula.clear();
+
+                realFormula.clear();
+
+                resultFormula.clear();
+                currNumber = 0;
+            }
+            else{
+                currFormula.append(" + ");
+
+                realFormula.append(" + ");
+
+                resultFormula.append(" + ");
+            }
+            continue;
+        }
+
+        // 到这里就必须把两个数一起处理了
+        index += 2;             // 直接跳到后面一个去
+        num += 2;
+        if (data0->magic >= data1->magic){
+            __int128_t division = data0->magic / data1->magic;
+            if (division + currNumber <= 1024){
+                currNumber += division;
+                currFormula.append(data0->locationid);
+                currFormula.append(" / ");
+                currFormula.append(data1->locationid);
+
+                realFormula.append(_567::writeToString(data0->magic));
+                realFormula.append(" / ");
+                realFormula.append(_567::writeToString(data1->magic));
+
+                resultFormula.append(_567::writeToString(division));
+                if (currNumber == 1024 && num >= 4){
+                    std::cout << "curr formula = " << currFormula << std::endl;
+
+                    std::cout << "real formula = " << realFormula << std::endl;
+
+                    std::cout << "result formula = " << resultFormula << std::endl;
+                    if (PostFormula(formula) == 0){
+                        formulaScore += (num * num);
+                    }
+                    // 不管什么结果, 之前的全部不用了
+                    num = 0;
+                    currFormula.clear();
+
+                    realFormula.clear();
+
+                    resultFormula.clear();
+                    currNumber = 0;
+                }
+                else{
+                    currFormula.append(" + ");
+
+                    realFormula.append(" + ");
+
+                    resultFormula.append(" + ");
+                }
+            }
+            else{
+                currFormula.append(data1->locationid);
+                currFormula.append(" / ");
+                currFormula.append(data0->locationid);
+                currFormula.append(" + ");
+
+                realFormula.append(_567::writeToString(data1->magic));
+                realFormula.append(" / ");
+                realFormula.append(_567::writeToString(data0->magic));
+                realFormula.append(" + ");
+
+                resultFormula.append(_567::writeToString(0));
+                resultFormula.append(" + ");
+            }
+        }
+        else{
+            __int128_t division = data1->magic / data0->magic;
+            if (division + currNumber <= 1024){
+                currNumber += division;
+                currFormula.append(data1->locationid);
+                currFormula.append(" / ");
+                currFormula.append(data0->locationid);
+
+                realFormula.append(_567::writeToString(data1->magic));
+                realFormula.append(" / ");
+                realFormula.append(_567::writeToString(data0->magic));
+
+                resultFormula.append(_567::writeToString(division));
+                if (currNumber == 1024 && num >= 4){
+                    std::cout << "curr formula = " << currFormula << std::endl;
+
+                    std::cout << "real formula = " << realFormula << std::endl;
+
+                    std::cout << "result formula = " << resultFormula << std::endl;
+                    if (PostFormula(formula) == 0){
+                        formulaScore += (num * num);
+                    }
+                    // 不管什么结果, 之前的全部不用了
+                    num = 0;
+                    currFormula.clear();
+
+                    realFormula.clear();
+
+                    resultFormula.clear();
+                    currNumber = 0;
+                }
+                else{
+                    currFormula.append(" + ");
+
+                    realFormula.append(" + ");
+
+                    resultFormula.append(" + ");
+                }
+            }
+            else{
+                currFormula.append(data0->locationid);
+                currFormula.append(" / ");
+                currFormula.append(data1->locationid);
+                currFormula.append(" + ");
+
+                realFormula.append(_567::writeToString(data0->magic));
+                realFormula.append(" / ");
+                realFormula.append(_567::writeToString(data1->magic));
+                realFormula.append(" + ");
+
+                resultFormula.append(_567::writeToString(0));
+                resultFormula.append(" + ");
+            }
+        }
+    }
+
+    if (!stopFormula)
+        usleep(1000000);                    // 睡１秒
+    else
+        return;
+    goto STARTSEARCH;
+}
+
 int main(int argc, char const *argv[]){
     auto startMS = _567::NowMicroseconds();
 
@@ -112,6 +339,21 @@ int main(int argc, char const *argv[]){
     memPool = new MemPool();
 
     realDatas = new std::vector<RealData*>();
+
+    // 单独起个线程跑公式
+    std::thread thread([](){
+        cpu_set_t mask;
+        CPU_ZERO(&mask);                // 初始化set集，将set置为空
+        CPU_SET(0, &mask);
+        if (sched_setaffinity(0, sizeof(cpu_set_t), &mask) == -1){
+            //std::cout << "Bind thread to cpu " << cpu << " failed." << std::endl;
+        }
+        else{
+            //std::cout << "Bind thread to cpu " << cpu << std::endl;
+        }
+        FindFormula();
+        stopped = true;
+    });
 
     // 从四个起点开始沿不同方向遍历所有文件
     int startPoint0 = 31, startPoint1 = 32, startPoint2 = 95, startPoint3 = 96;
@@ -145,9 +387,6 @@ int main(int argc, char const *argv[]){
             std::cout << file << " completed." << std::endl;
             usleep(500000);           // 休眠500000微秒(500毫秒)
         }
-        else{
-            std::cout << "File " << file << " open failed." << std::endl;
-        }
 
         idx = startPoint1 + offset;
         file = "./Treasure_" + std::to_string(idx) + ".data";
@@ -176,9 +415,6 @@ int main(int argc, char const *argv[]){
             ifstream1.close();
             std::cout << file << " completed." << std::endl;
             usleep(500000);           // 休眠500000微秒(500毫秒)
-        }
-        else{
-            std::cout << "File " << file << " open failed." << std::endl;
         }
 
         idx = startPoint2 - offset;
@@ -209,9 +445,6 @@ int main(int argc, char const *argv[]){
             std::cout << file << " completed." << std::endl;
             usleep(500000);           // 休眠500000微秒(500毫秒)
         }
-        else{
-            std::cout << "File " << file << " open failed." << std::endl;
-        }
 
         idx = startPoint3 + offset;
         file = "./Treasure_" + std::to_string(idx) + ".data";
@@ -240,9 +473,6 @@ int main(int argc, char const *argv[]){
             ifstream3.close();
             std::cout << file << " completed." << std::endl;
             usleep(500000);           // 休眠500000微秒(500毫秒)
-        }
-        else{
-            std::cout << "File " << file << " open failed." << std::endl;
         }
     }
 
@@ -285,11 +515,16 @@ int main(int argc, char const *argv[]){
         usleep(500000);           // 休眠500000微秒(500毫秒)
     }
 
-    // 寻找公式
-
+    std::cout << "jobs done...wait formula" << std::endl;
+    stopFormula = true;
+    while (!stopped){
+        usleep(500000);           // 休眠500000微秒(500毫秒)
+    }
+    thread.join();
 
     std::cout << "find " << realDatas->size() << " datas in " << totalLines << " lines." << std::endl;
-    std::cout << "final score: " << totalCount << std::endl;
+    std::cout << "dig score: " << totalCount << std::endl;
+    std::cout << "formula score: " << formulaScore << std::endl;
 
     auto afterMS = _567::NowMicroseconds();
     auto diff = afterMS - startMS;

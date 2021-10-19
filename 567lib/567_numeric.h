@@ -3,6 +3,7 @@
 #include <bits/stdc++.h>
 #include <cstdio>
 #include <iostream>
+#include <sstream>
 
 // 重载 << 运算符支持 int128
 std::ostream& operator << (std::ostream& dest, __int128_t value){
@@ -92,5 +93,11 @@ namespace _567{
         }
         if (x > 9) write(x / 10);
         putchar(x % 10 + '0');
+    }
+
+    inline std::string writeToString(__int128_t x){
+        std::stringstream ss;
+        ss << x;
+        return ss.str();
     }
 }

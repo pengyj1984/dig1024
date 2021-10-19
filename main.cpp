@@ -319,21 +319,21 @@ void FindFormula(){
 int main(int argc, char const *argv[]){
     auto startMS = _567::NowMicroseconds();
 
-    cpu_set_t mask;
-    CPU_ZERO(&mask);                // 初始化set集，将set置为空
-    CPU_SET(0, &mask);
-    if (sched_setaffinity(0, sizeof(cpu_set_t), &mask) == -1){
-        //std::cout << "Bind main thread to cpu 0 failed." << std::endl;
-    }
-    else{
-        //std::cout << "Bind main thread to cpu 0." << std::endl;
-    }
+//    cpu_set_t mask;
+//    CPU_ZERO(&mask);                // 初始化set集，将set置为空
+//    CPU_SET(0, &mask);
+//    if (sched_setaffinity(0, sizeof(cpu_set_t), &mask) == -1){
+//        //std::cout << "Bind main thread to cpu 0 failed." << std::endl;
+//    }
+//    else{
+//        //std::cout << "Bind main thread to cpu 0." << std::endl;
+//    }
 
     // 禁掉 SIGPIPE 信号避免因为连接关闭出错
     _567::IgnoreSignal();
     // 初始化线程池．
     // 考虑发起curl请求的时候会等待, 线程池应该比实际cpu线程数大．
-    auto&& pool = std::make_shared<_567::ThreadPool<void>>(8);
+    auto&& pool = std::make_shared<_567::ThreadPool<void>>(12);
 
     // 初始化内存池
     memPool = new MemPool();
@@ -342,9 +342,13 @@ int main(int argc, char const *argv[]){
 
     // 单独起个线程跑公式
     std::thread thread([](){
+        int cpus = sysconf(_SC_NPROCESSORS_ONLN);       // 获取当前设备cpu数量
         cpu_set_t mask;
         CPU_ZERO(&mask);                // 初始化set集，将set置为空
-        CPU_SET(0, &mask);
+        if (cpus > 0)
+            CPU_SET(1, &mask);
+        else
+            CPU_SET(0, &mask);
         if (sched_setaffinity(0, sizeof(cpu_set_t), &mask) == -1){
             //std::cout << "Bind thread to cpu " << cpu << " failed." << std::endl;
         }
@@ -385,7 +389,7 @@ int main(int argc, char const *argv[]){
             }
             ifstream0.close();
             std::cout << file << " completed." << std::endl;
-            usleep(500000);           // 休眠500000微秒(500毫秒)
+            //usleep(1000);           // 休眠1000微秒(1毫秒)
         }
 
         idx = startPoint1 + offset;
@@ -414,7 +418,7 @@ int main(int argc, char const *argv[]){
             }
             ifstream1.close();
             std::cout << file << " completed." << std::endl;
-            usleep(500000);           // 休眠500000微秒(500毫秒)
+            //usleep(1000);           // 休眠1000微秒(1毫秒)
         }
 
         idx = startPoint2 - offset;
@@ -443,7 +447,7 @@ int main(int argc, char const *argv[]){
             }
             ifstream2.close();
             std::cout << file << " completed." << std::endl;
-            usleep(500000);           // 休眠500000微秒(500毫秒)
+            //usleep(1000);           // 休眠1000微秒(1毫秒)
         }
 
         idx = startPoint3 + offset;
@@ -472,7 +476,7 @@ int main(int argc, char const *argv[]){
             }
             ifstream3.close();
             std::cout << file << " completed." << std::endl;
-            usleep(500000);           // 休眠500000微秒(500毫秒)
+            //usleep(1000);           // 休眠1000微秒(1毫秒)
         }
     }
 

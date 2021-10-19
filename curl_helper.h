@@ -2,6 +2,7 @@
 
 #include <curl/curl.h>
 #include "data.h"
+//#include "567lib/567_chrono.h"
 
 const std::string token = "62b11c372bbf05ffeda21dc10bd51bc2";
 const std::string dig = "http://47.104.220.230/dig";
@@ -14,6 +15,7 @@ size_t receive_data(void *contents, size_t size, size_t nmemb, void *stream){
 }
 
 inline int PostDig(const std::string &locationId){
+    //auto startMS = _567::NowEpoch10m();
     DigData data(locationId, token);
     std::stringstream ss;
     ajson::save_to(ss, data);
@@ -49,6 +51,9 @@ inline int PostDig(const std::string &locationId){
     ret = curl_easy_perform(pCURL);
     curl_easy_cleanup(pCURL);
 
+    //auto currMS = _567::NowEpoch10m();
+    //auto diff = currMS - startMS;
+    //std::cout << "curl diff = " << diff << std::endl;
     if (ret == CURLE_OK){
         DigResult result;
         ajson::load_from_buff(result, response.c_str(), response.size());

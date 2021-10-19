@@ -96,16 +96,17 @@ int main(int argc, char const *argv[]){
     CPU_ZERO(&mask);                // 初始化set集，将set置为空
     CPU_SET(0, &mask);
     if (sched_setaffinity(0, sizeof(cpu_set_t), &mask) == -1){
-        std::cout << "Bind main thread to cpu 0 failed." << std::endl;
+        //std::cout << "Bind main thread to cpu 0 failed." << std::endl;
     }
     else{
-        std::cout << "Bind main thread to cpu 0." << std::endl;
+        //std::cout << "Bind main thread to cpu 0." << std::endl;
     }
 
     // 禁掉 SIGPIPE 信号避免因为连接关闭出错
     _567::IgnoreSignal();
-    // 初始化线程池
-    auto&& pool = std::make_shared<_567::ThreadPool<void>>(4);
+    // 初始化线程池．
+    // 考虑发起curl请求的时候会等待, 线程池应该比实际cpu线程数大．
+    auto&& pool = std::make_shared<_567::ThreadPool<void>>(8);
 
     // 初始化内存池
     memPool = new MemPool();

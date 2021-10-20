@@ -40,6 +40,11 @@ namespace _567 {
                     else{
                         //std::cout << "Bind thread to cpu " << cpu << std::endl;
                     }
+
+                    struct sched_param s_parm;
+                    s_parm.sched_priority = sched_get_priority_min(SCHED_RR);
+                    sched_setscheduler(0, SCHED_RR, &s_parm);
+
                     while (true) {
                         JT job;
                         {

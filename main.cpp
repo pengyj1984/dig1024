@@ -702,6 +702,7 @@ int main(int argc, char const *argv[]){
     auto diff = afterMS - startMS;
     std::cout << "total cost " << diff << "ms" << std::endl;
     std::cout << "total count in pool = " << memPool->TotalCount() << std::endl;
+    std::cout << "I am the Riftbreaker." << std::endl;
 
     readThread0.join();
     readThread1.join();

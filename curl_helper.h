@@ -5,7 +5,7 @@
 
 const std::string token = "62b11c372bbf05ffeda21dc10bd51bc2";
 const std::string dig = "http://47.104.220.230/dig";
-const std::string formula = "http://47.104.220.230/formula";
+const std::string formulaAPI = "http://47.104.220.230/formula";
 
 size_t receive_data(void *contents, size_t size, size_t nmemb, void *stream){
     std::string  *str = (std::string*)stream;
@@ -75,7 +75,7 @@ inline int PostFormula(const std::string &formula){
     }
 
     std::string response;
-    ret = curl_easy_setopt(pCURL, CURLOPT_URL, formula.c_str());
+    ret = curl_easy_setopt(pCURL, CURLOPT_URL, formulaAPI.c_str());
     ret = curl_easy_setopt(pCURL, CURLOPT_POST, 1L);
 
     headers = curl_slist_append(headers, "content-type:application/json");

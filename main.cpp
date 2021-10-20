@@ -97,7 +97,7 @@ void FindFormula(){
     auto index = 0;
     __int128_t currNumber = 0;
     int num = 0;
-    std::string currFormula, realFormula, resultFormula;
+    std::string currFormula;
     STARTSEARCH:
     // 因为后面计算的时候是两个两个取出来算的, 这里如果正常判断最后可能会死循环
     if (index >= realDatas->size())
@@ -122,32 +122,18 @@ void FindFormula(){
             ++index;
             currNumber += data0->magic;
             currFormula.append(data0->locationid);
-
-            realFormula.append(_567::writeToString(data0->magic));
-
-            resultFormula.append(_567::writeToString(data0->magic));
             if (currNumber == 1024 && num >= 4){
                 std::cout << "curr formula = " << currFormula << std::endl;
-
-                std::cout << "real formula = " << realFormula << std::endl;
-
-                std::cout << "result formula = " << resultFormula << std::endl;
-                if (PostFormula(formula) == 0){
+                if (PostFormula(currFormula) == 0){
                     formulaScore += (num * num);
                 }
                 // 不管什么结果, 之前的全部不用了
                 num = 0;
                 currFormula.clear();
-                realFormula.clear();
-                resultFormula.clear();
                 currNumber = 0;
             }
             else{
                 currFormula.append(" + ");
-
-                realFormula.append(" + ");
-
-                resultFormula.append(" + ");
             }
             continue;
         }
@@ -164,34 +150,18 @@ void FindFormula(){
             index += 2;             // 直接跳到后面一个去
             currNumber += data1->magic;
             currFormula.append(data1->locationid);
-
-            realFormula.append(_567::writeToString(data1->magic));
-
-            resultFormula.append(_567::writeToString(data1->magic));
             if (currNumber == 1024 && num >= 4){
                 std::cout << "curr formula = " << currFormula << std::endl;
-
-                std::cout << "real formula = " << realFormula << std::endl;
-
-                std::cout << "result formula = " << resultFormula << std::endl;
-                if (PostFormula(formula) == 0){
+                if (PostFormula(currFormula) == 0){
                     formulaScore += (num * num);
                 }
                 // 不管什么结果, 之前的全部不用了
                 num = 0;
                 currFormula.clear();
-
-                realFormula.clear();
-
-                resultFormula.clear();
                 currNumber = 0;
             }
             else{
                 currFormula.append(" + ");
-
-                realFormula.append(" + ");
-
-                resultFormula.append(" + ");
             }
             continue;
         }
@@ -200,42 +170,48 @@ void FindFormula(){
         index += 2;             // 直接跳到后面一个去
         num += 2;
         if (data0->magic >= data1->magic){
+            // 先尝试减法
+            __int128_t diff = data0->magic - data1->magic;
+            if(diff + currNumber <= 1024){
+                currNumber += diff;
+                currFormula.append(data0->locationid);
+                currFormula.append(" - ");
+                currFormula.append(data1->locationid);
+                if (currNumber == 1024 && num >= 4){
+                    std::cout << "curr formula = " << currFormula << std::endl;
+                    if (PostFormula(currFormula) == 0){
+                        formulaScore += (num * num);
+                    }
+                    // 不管什么结果, 之前的全部不用了
+                    num = 0;
+                    currFormula.clear();
+                    currNumber = 0;
+                }
+                else{
+                    currFormula.append(" + ");
+                }
+
+                continue;
+            }
+
             __int128_t division = data0->magic / data1->magic;
             if (division + currNumber <= 1024){
                 currNumber += division;
                 currFormula.append(data0->locationid);
                 currFormula.append(" / ");
                 currFormula.append(data1->locationid);
-
-                realFormula.append(_567::writeToString(data0->magic));
-                realFormula.append(" / ");
-                realFormula.append(_567::writeToString(data1->magic));
-
-                resultFormula.append(_567::writeToString(division));
                 if (currNumber == 1024 && num >= 4){
                     std::cout << "curr formula = " << currFormula << std::endl;
-
-                    std::cout << "real formula = " << realFormula << std::endl;
-
-                    std::cout << "result formula = " << resultFormula << std::endl;
-                    if (PostFormula(formula) == 0){
+                    if (PostFormula(currFormula) == 0){
                         formulaScore += (num * num);
                     }
                     // 不管什么结果, 之前的全部不用了
                     num = 0;
                     currFormula.clear();
-
-                    realFormula.clear();
-
-                    resultFormula.clear();
                     currNumber = 0;
                 }
                 else{
                     currFormula.append(" + ");
-
-                    realFormula.append(" + ");
-
-                    resultFormula.append(" + ");
                 }
             }
             else{
@@ -243,53 +219,51 @@ void FindFormula(){
                 currFormula.append(" / ");
                 currFormula.append(data0->locationid);
                 currFormula.append(" + ");
-
-                realFormula.append(_567::writeToString(data1->magic));
-                realFormula.append(" / ");
-                realFormula.append(_567::writeToString(data0->magic));
-                realFormula.append(" + ");
-
-                resultFormula.append(_567::writeToString(0));
-                resultFormula.append(" + ");
             }
         }
         else{
+            // 先尝试减法
+            __int128_t diff = data1->magic - data0->magic;
+            if(diff + currNumber <= 1024){
+                currNumber += diff;
+                currFormula.append(data1->locationid);
+                currFormula.append(" - ");
+                currFormula.append(data0->locationid);
+                if (currNumber == 1024 && num >= 4){
+                    std::cout << "curr formula = " << currFormula << std::endl;
+                    if (PostFormula(currFormula) == 0){
+                        formulaScore += (num * num);
+                    }
+                    // 不管什么结果, 之前的全部不用了
+                    num = 0;
+                    currFormula.clear();
+                    currNumber = 0;
+                }
+                else{
+                    currFormula.append(" + ");
+                }
+
+                continue;
+            }
+
             __int128_t division = data1->magic / data0->magic;
             if (division + currNumber <= 1024){
                 currNumber += division;
                 currFormula.append(data1->locationid);
                 currFormula.append(" / ");
                 currFormula.append(data0->locationid);
-
-                realFormula.append(_567::writeToString(data1->magic));
-                realFormula.append(" / ");
-                realFormula.append(_567::writeToString(data0->magic));
-
-                resultFormula.append(_567::writeToString(division));
                 if (currNumber == 1024 && num >= 4){
                     std::cout << "curr formula = " << currFormula << std::endl;
-
-                    std::cout << "real formula = " << realFormula << std::endl;
-
-                    std::cout << "result formula = " << resultFormula << std::endl;
-                    if (PostFormula(formula) == 0){
+                    if (PostFormula(currFormula) == 0){
                         formulaScore += (num * num);
                     }
                     // 不管什么结果, 之前的全部不用了
                     num = 0;
                     currFormula.clear();
-
-                    realFormula.clear();
-
-                    resultFormula.clear();
                     currNumber = 0;
                 }
                 else{
                     currFormula.append(" + ");
-
-                    realFormula.append(" + ");
-
-                    resultFormula.append(" + ");
                 }
             }
             else{
@@ -297,14 +271,6 @@ void FindFormula(){
                 currFormula.append(" / ");
                 currFormula.append(data1->locationid);
                 currFormula.append(" + ");
-
-                realFormula.append(_567::writeToString(data0->magic));
-                realFormula.append(" / ");
-                realFormula.append(_567::writeToString(data1->magic));
-                realFormula.append(" + ");
-
-                resultFormula.append(_567::writeToString(0));
-                resultFormula.append(" + ");
             }
         }
     }

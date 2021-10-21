@@ -23,7 +23,7 @@ void ReadFileUseStream(std::string fileName, MemPool *pool){
         }
 
         if (chunk->size > 0){
-
+            /////
         }
 
         ifstream.close();
@@ -32,7 +32,7 @@ void ReadFileUseStream(std::string fileName, MemPool *pool){
 }
 
 void ReadFileUseFile(const char *fileName, MemPool *pool){
-    FILE *file = fopen(fileName, "r");
+    FILE *file = fopen(fileName, "rb");
     int lines = 0;
 
     fseek(file, 0, 2);
@@ -43,23 +43,23 @@ void ReadFileUseFile(const char *fileName, MemPool *pool){
     fread(content, filelen, 1, file);
     unsigned long prevIdx = 0;
     auto&& chunk = pool->Alloc();
-//    for (unsigned long i = 0; i < filelen; ++i){
-//        if (content[i] == '\n'){
-//            auto&& data = chunk->datas[chunk->size];
-//            int size = i - prevIdx + 1;
-//            data.size = size;
-//            memcpy(data.buffer, &content[prevIdx], data.size);
-//            ++(chunk->size);
-//            ++lines;
-//            if (chunk->size >= MAXCHUNKSIZE){
-//                chunk = pool->Alloc();
-//            }
-//            prevIdx = i;
-//        }
-//    }
+    for (unsigned long i = 0; i < filelen; ++i){
+        if (content[i] == '\n'){
+            auto&& data = chunk->datas[chunk->size];
+            int size = i - prevIdx + 1;
+            data.size = size;
+            memcpy(data.buffer, &content[prevIdx], data.size);
+            ++(chunk->size);
+            ++lines;
+            if (chunk->size >= MAXCHUNKSIZE){
+                chunk = pool->Alloc();
+            }
+            prevIdx = i;
+        }
+    }
 
     if (chunk->size > 0){
-
+        /////
     }
 
     free(content);

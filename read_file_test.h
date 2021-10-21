@@ -4,6 +4,7 @@
 #include <string.h>
 #include <iostream>
 #include <sys/mman.h>
+#include <fcntl.h>
 #include "mempool.h"
 
 void ReadFileUseStream(std::string fileName, MemPool *pool){
@@ -29,7 +30,7 @@ void ReadFileUseStream(std::string fileName, MemPool *pool){
 
         ifstream.close();
     }
-    std::cout << "total lines = " << lines << std::endl;
+    //std::cout << "total lines = " << lines << std::endl;
 }
 
 void ReadFileUseFile(const char *fileName, MemPool *pool){
@@ -65,10 +66,42 @@ void ReadFileUseFile(const char *fileName, MemPool *pool){
 
     free(content);
     fclose(file);
-    std::cout << "total lines = " << lines << std::endl;
+    //std::cout << "total lines = " << lines << std::endl;
 }
 
 void ReadFileUsemmap(const char *fileName, MemPool *pool){
+    int lines = 0;
     char *data = nullptr;
-    //int fd = open();
+    int fd = open(fileName, O_RDONLY);
+    int filelen = lseek(fd, 0, SEEK_END);
+    char *addr = (char*)mmap64(NULL, filelen, PROT_READ, MAP_PRIVATE, fd, 0);
+    close(fd);
+
+    char *content = (char*)malloc(filelen * sizeof (char));
+    memcpy(content, addr, filelen);
+    munmap(addr, filelen);
+
+    unsigned long prevIdx = 0;
+    auto&& chunk = pool->Alloc();
+    for (unsigned long i = 0; i < filelen; ++i){
+        if (content[i] == '\n'){
+            auto&& data = chunk->datas[chunk->size];
+            int size = i - prevIdx + 1;
+            data.size = size;
+            memcpy(data.buffer, &content[prevIdx], data.size);
+            ++(chunk->size);
+            ++lines;
+            if (chunk->size >= MAXCHUNKSIZE){
+                chunk = pool->Alloc();
+            }
+            prevIdx = i;
+        }
+    }
+
+    if (chunk->size > 0){
+        /////
+    }
+
+    free(content);
+    //std::cout << "total lines = " << lines << std::endl;
 }

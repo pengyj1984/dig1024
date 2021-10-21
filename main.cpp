@@ -23,7 +23,6 @@ int filePipes[4] = {0, 0, 0, 0};
 
 int formulaScore = 0;
 int totalCount = 0;
-int totalLines = 0;
 std::vector<RealData*> *realDatas;
 
 void HandleSourceData(MemChunk *chunk){
@@ -121,7 +120,6 @@ void ReadFiles(int start, int step, int index, int threadIdx){
                 data.size = temp.size();
                 memcpy(data.buffer, temp.c_str(), data.size);
                 chunk->size++;
-                ++totalLines;
                 if (chunk->size >= MAXCHUNKSIZE){
                     pool->Add([chunk](){
                         HandleSourceData(chunk);
@@ -352,7 +350,7 @@ int main(int argc, char const *argv[]){
         else usleep(1000000);                    // 睡１秒
     }
 
-    std::cout << "Find " << realDatas->size() << " datas in " << totalLines << " lines." << std::endl;
+    std::cout << "Find " << realDatas->size() << " datas." << std::endl;
     std::cout << "Dig score: " << totalCount << std::endl;
     std::cout << "Formula score: " << formulaScore << std::endl;
 

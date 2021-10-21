@@ -34,7 +34,17 @@ int main(int argc, char const *argv[]){
     //std::cout << "file3 size = " << if3.width() << std::endl;
 
     ReadFileUseStream("./Treasure_0.data", memPool);
-    //ReadFileUseFile("./Treasure_0.data", memPool);
+    ReadFileUseStream("./Treasure_1.data", memPool);
+    ReadFileUseStream("./Treasure_2.data", memPool);
+    ReadFileUseStream("./Treasure_3.data", memPool);
+//    ReadFileUseFile("./Treasure_0.data", memPool);
+//    ReadFileUseFile("./Treasure_1.data", memPool);
+//    ReadFileUseFile("./Treasure_2.data", memPool);
+//    ReadFileUseFile("./Treasure_3.data", memPool);
+//    ReadFileUsemmap("./Treasure_0.data", memPool);
+//    ReadFileUsemmap("./Treasure_1.data", memPool);
+//    ReadFileUsemmap("./Treasure_2.data", memPool);
+//    ReadFileUsemmap("./Treasure_3.data", memPool);
 
 //    FILE *file0 = fopen("./Treasure_0.data", "r");
 //    fseek(file0, 0, 2);
@@ -45,5 +55,5 @@ int main(int argc, char const *argv[]){
 
     auto endMS = _567::NowMicroseconds();
     std::cout << "time = " << (endMS - startMS) << "ms." << std::endl;
-    std::cout << "pool size = " << memPool->TotalCount() << std::endl;
+    //std::cout << "pool size = " << memPool->TotalCount() << std::endl;
 }

@@ -121,16 +121,16 @@ void ReadFiles(int start, int step, int index, int threadIdx){
                 memcpy(data.buffer, temp.c_str(), data.size);
                 chunk->size++;
                 if (chunk->size >= MAXCHUNKSIZE){
-                    pool->Add([chunk](){
-                        HandleSourceData(chunk);
-                    });
-                    chunk = memPool->Alloc();
+//                    pool->Add([chunk](){
+//                        HandleSourceData(chunk);
+//                    });
+//                    chunk = memPool->Alloc();
                 }
             }
             if (chunk->size > 0){
-                pool->Add([chunk](){
-                    HandleSourceData(chunk);
-                });
+//                pool->Add([chunk](){
+//                    HandleSourceData(chunk);
+//                });
             }
             ifstream.close();
             std::cout << file << " completed." << std::endl;

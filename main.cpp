@@ -21,9 +21,6 @@ std::shared_ptr<_567::ThreadPool<void>> pool;
 
 int filePipes[4] = {0, 0, 0, 0};
 
-bool stopFormula = false;
-bool stopped = false;
-
 int formulaScore = 0;
 int totalCount = 0;
 int totalLines = 0;
@@ -355,14 +352,14 @@ int main(int argc, char const *argv[]){
         else usleep(1000000);                    // 睡１秒
     }
 
-    std::cout << "find " << realDatas->size() << " datas in " << totalLines << " lines." << std::endl;
-    std::cout << "dig score: " << totalCount << std::endl;
-    std::cout << "formula score: " << formulaScore << std::endl;
+    std::cout << "Find " << realDatas->size() << " datas in " << totalLines << " lines." << std::endl;
+    std::cout << "Dig score: " << totalCount << std::endl;
+    std::cout << "Formula score: " << formulaScore << std::endl;
 
     auto afterMS = _567::NowMicroseconds();
     auto diff = afterMS - startMS;
-    std::cout << "total cost " << diff << "ms" << std::endl;
-    std::cout << "total count in pool = " << memPool->TotalCount() << std::endl;
+    std::cout << "Total cost " << diff << "ms" << std::endl;
+    std::cout << "Max items num in pool = " << memPool->TotalCount() << std::endl;
     std::cout << "I am the Riftbreaker." << std::endl;
 
     readThread0.join();

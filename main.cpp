@@ -33,8 +33,8 @@ int main(int argc, char const *argv[]){
     //std::ifstream if3("./Treasure_3.data");
     //std::cout << "file3 size = " << if3.width() << std::endl;
 
-    //ReadFileUseStream("./Treasure_0.data", memPool);
-    ReadFileUseFile("./Treasure_0.data", memPool);
+    ReadFileUseStream("./Treasure_0.data", memPool);
+    //ReadFileUseFile("./Treasure_0.data", memPool);
 
 //    FILE *file0 = fopen("./Treasure_0.data", "r");
 //    fseek(file0, 0, 2);

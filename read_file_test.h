@@ -14,14 +14,14 @@ void ReadFileUseStream(std::string fileName, MemPool *pool){
         std::string temp;
         auto&& chunk = pool->Alloc();
         while (getline(ifstream, temp)){
-            auto&& data = chunk->datas[chunk->size];
-            data.size = temp.size();
-            memcpy(data.buffer, temp.c_str(), data.size);
-            ++(chunk->size);
-            ++lines;
-            if (chunk->size >= MAXCHUNKSIZE){
-                chunk = pool->Alloc();
-            }
+//            auto&& data = chunk->datas[chunk->size];
+//            data.size = temp.size();
+//            memcpy(data.buffer, temp.c_str(), data.size);
+//            ++(chunk->size);
+//            ++lines;
+//            if (chunk->size >= MAXCHUNKSIZE){
+//                chunk = pool->Alloc();
+//            }
         }
 
         if (chunk->size > 0){
@@ -45,20 +45,20 @@ void ReadFileUseFile(const char *fileName, MemPool *pool){
     fread(content, filelen, 1, file);
     unsigned long prevIdx = 0;
     auto&& chunk = pool->Alloc();
-    for (unsigned long i = 0; i < filelen; ++i){
-        if (content[i] == '\n'){
-            auto&& data = chunk->datas[chunk->size];
-            int size = i - prevIdx + 1;
-            data.size = size;
-            memcpy(data.buffer, &content[prevIdx], data.size);
-            ++(chunk->size);
-            ++lines;
-            if (chunk->size >= MAXCHUNKSIZE){
-                chunk = pool->Alloc();
-            }
-            prevIdx = i;
-        }
-    }
+//    for (unsigned long i = 0; i < filelen; ++i){
+//        if (content[i] == '\n'){
+//            auto&& data = chunk->datas[chunk->size];
+//            int size = i - prevIdx + 1;
+//            data.size = size;
+//            memcpy(data.buffer, &content[prevIdx], data.size);
+//            ++(chunk->size);
+//            ++lines;
+//            if (chunk->size >= MAXCHUNKSIZE){
+//                chunk = pool->Alloc();
+//            }
+//            prevIdx = i;
+//        }
+//    }
 
     if (chunk->size > 0){
         /////

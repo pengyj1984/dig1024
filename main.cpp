@@ -33,10 +33,16 @@ int main(int argc, char const *argv[]){
     //std::ifstream if3("./Treasure_3.data");
     //std::cout << "file3 size = " << if3.width() << std::endl;
 
-    ReadFileUseStream("./Treasure_0.data", memPool);
-    ReadFileUseStream("./Treasure_1.data", memPool);
-    ReadFileUseStream("./Treasure_2.data", memPool);
-    ReadFileUseStream("./Treasure_3.data", memPool);
+    for (int i = 0; i < 128; ++i){
+        std::string file = "./Treasure_";
+        file.append(std::to_string(i));
+        file.append(".data");
+        ReadFileUseStream(file.c_str(), memPool);
+    }
+//    ReadFileUseStream("./Treasure_0.data", memPool);
+//    ReadFileUseStream("./Treasure_1.data", memPool);
+//    ReadFileUseStream("./Treasure_2.data", memPool);
+//    ReadFileUseStream("./Treasure_3.data", memPool);
 //    ReadFileUseFile("./Treasure_0.data", memPool);
 //    ReadFileUseFile("./Treasure_1.data", memPool);
 //    ReadFileUseFile("./Treasure_2.data", memPool);

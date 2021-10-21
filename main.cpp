@@ -51,7 +51,7 @@ inline int ReadAllBytes(std::filesystem::path const& path, std::unique_ptr<uint8
     return 0;
 }
 
-#define NUM_THREADS 2
+#define NUM_THREADS 4
 
 int main() {
     std::cout << std::filesystem::current_path() << std::endl;

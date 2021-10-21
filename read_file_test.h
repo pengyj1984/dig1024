@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
+#include <sys/mman.h>
 #include "mempool.h"
 
 void ReadFileUseStream(std::string fileName, MemPool *pool){
@@ -65,4 +66,9 @@ void ReadFileUseFile(const char *fileName, MemPool *pool){
     free(content);
     fclose(file);
     std::cout << "total lines = " << lines << std::endl;
+}
+
+void ReadFileUsemmap(const char *fileName, MemPool *pool){
+    char *data = nullptr;
+    //int fd = open();
 }

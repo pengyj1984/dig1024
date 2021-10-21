@@ -1,9 +1,10 @@
-#include <iostream>
 #include <vector>
+#include <thread>
+#include <iostream>
 #include <string>
-#include <chrono>
 #include <filesystem>
 #include <fstream>
+#include <cassert>
 
 // 得到当前时间点的 epoch 秒
 inline double NowEpochSeconds() noexcept {
@@ -50,22 +51,34 @@ inline int ReadAllBytes(std::filesystem::path const& path, std::unique_ptr<uint8
     return 0;
 }
 
+#define NUM_THREADS 2
 
 int main() {
     std::cout << std::filesystem::current_path() << std::endl;
     std::vector<std::filesystem::path> files;
     for (auto&& entry : std::filesystem::recursive_directory_iterator(std::filesystem::current_path())) {
         if (!entry.is_regular_file()) continue;
+        if (entry.path().extension() != ".data") continue;
         files.push_back(entry.path());
     }
 
-    std::unique_ptr<uint8_t[]> buf;
-    size_t siz;
     auto start = NowEpochSeconds();
-    for(auto& f : files) {
-        if (int r = ReadAllBytes(f, buf, siz)) return r;
+    {
+        std::array<std::thread, NUM_THREADS> ts;
+        for (int i = 0; i < NUM_THREADS; ++i) {
+            ts[i] = std::thread([&, i = i]{
+                std::unique_ptr<uint8_t[]> buf;
+                size_t siz = 0;
+                for (int j = i; j < (int)files.size(); j += NUM_THREADS) {
+                    auto& f = files[j];
+                    int r = ReadAllBytes(f, buf, siz);
+                    assert(r);
+                }
+                std::cout << "thread " << i << ": siz " << siz << std::endl;
+            });
+        }
+        for(auto& t : ts) t.join();
     }
     std::cout << "secs = " << (NowEpochSeconds() - start) << std::endl;
-    std::cout << "siz " << siz << std::endl;
     return 0;
 }

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.18)
 project(dig1024)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto -static")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto -static-libgcc -static-libstdc++")
 
 include_directories(./567lib)
 include_directories(./)

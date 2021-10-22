@@ -16,9 +16,11 @@ struct RealData{
     RealData(const std::string &_locationid, const __int128_t &_magic);
     std::string locationid;
     __int128_t magic;
+    int flag;
 };
 
-RealData::RealData(const std::string &_locationid, const __int128_t &_magic):locationid(_locationid), magic(_magic){}
+RealData::RealData(const std::string &_locationid, const __int128_t &_magic):locationid(_locationid), magic(_magic), flag(0){
+}
 
 // 挖宝验证数据结构
 struct DigData{
@@ -35,9 +37,10 @@ AJSON(DigData, locationid, token);
 struct DigResult{
     int errorno;
     std::string msg;
+    std::vector<std::string> data;
 };
 
-AJSON(DigResult, errorno, msg);
+AJSON(DigResult, errorno, msg, data);
 
 // 公式验证数据结构
 struct FormulaData{

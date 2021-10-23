@@ -24,6 +24,8 @@ int filePipes[4] = {0, 0, 0, 0};
 int formulaScore = 0;
 int totalCount = 0;
 std::vector<RealData*> *realDatas;
+std::unordered_map<std::string, int> usedDatas;
+int usedCount = 0;
 
 void HandleSourceData(MemChunk *chunk){
     // 一次处理过程能得到的有效数据应该不会
@@ -145,6 +147,32 @@ bool ReadFileFinished(){
     && filePipes[2] >= MAXFILENUMPERTHREAD && filePipes[3] >= MAXFILENUMPERTHREAD;
 }
 
+// 2021.10.23
+void MarkUsedDatas(){
+    std::unordered_map<std::string, int>::iterator iter = usedDatas.begin();
+    while (iter != usedDatas.end()){
+        (*realDatas)[iter->second]->flag = 1;
+        ++iter;
+    }
+
+    usedCount += usedDatas.size();
+    usedDatas.clear();
+}
+
+// 2021.10.23
+void MarkAbandonedDatas(std::vector<std::string> &vec){
+    std::vector<std::string>::iterator iter = vec.begin();
+    while (iter != vec.end()){
+        auto it = usedDatas.find(*iter);
+        if (it != usedDatas.end()){
+            (*realDatas)[it->second]->flag = 1;
+        }
+        ++iter;
+        ++usedCount;
+    }
+    usedDatas.clear();
+}
+
 int main(int argc, char const *argv[]){
     auto startMS = _567::NowMicroseconds();
     int cpus = sysconf(_SC_NPROCESSORS_ONLN);       // 获取当前设备cpu数量
@@ -178,133 +206,70 @@ int main(int argc, char const *argv[]){
     int num = 0;
     std::string currFormula;
     while (true){
-        while (realDatas->size() > 0 && index < realDatas->size() - 1){
-            //std::cout << "currNumber = " << currNumber << std::endl;
-            auto data0 = (*realDatas)[index];
-            if (data0->magic == 0){
-                // 以防万一
-                ++index;
+        while (realDatas->size() > 0 && index < realDatas->size()){
+            auto data0 = (*realDatas)[index++];
+            if (data0->flag != 0 || data0->magic == 0){
                 continue;
             }
 
             if (data0->magic + currNumber <= 1024){
                 ++num;
-                ++index;
                 currNumber += data0->magic;
                 currFormula.append(data0->locationid);
+                usedDatas[data0->locationid] = index - 1;
                 if (currNumber == 1024 && num >= 4){
                     std::cout << "curr formula = " << currFormula << std::endl;
-                    if (PostFormula(currFormula) == 0){
+                    FormulaResult result;
+                    int errorno = PostFormula(currFormula, result);
+                    if (errorno == 0){
+                        MarkUsedDatas();
                         formulaScore += (num * num);
                     }
-                    // 不管什么结果, 之前的全部不用了
+                    else if (errorno == 3){
+                        MarkAbandonedDatas(result.data);
+                    }
                     num = 0;
                     currFormula.clear();
                     currNumber = 0;
                 }
                 else{
-                    currFormula.append(" + ");
-                }
-                continue;
-            }
-
-            auto data1 = (*realDatas)[index + 1];
-            if (data1->magic == 0){
-                // 以防万一
-                index += 2;
-                continue;
-            }
-
-            if(data1->magic + currNumber <= 1024){
-                ++num;
-                index += 2;             // 直接跳到后面一个去
-                currNumber += data1->magic;
-                currFormula.append(data1->locationid);
-                if (currNumber == 1024 && num >= 4){
-                    std::cout << "curr formula = " << currFormula << std::endl;
-                    if (PostFormula(currFormula) == 0){
-                        formulaScore += (num * num);
-                    }
-                    // 不管什么结果, 之前的全部不用了
-                    num = 0;
-                    currFormula.clear();
-                    currNumber = 0;
-                }
-                else{
-                    currFormula.append(" + ");
-                }
-                continue;
-            }
-
-            // 到这里就必须把两个数一起处理了
-            index += 2;             // 直接跳到后面一个去
-            num += 2;
-            if (data0->magic >= data1->magic){
-                // 先尝试减法
-                __int128_t diff = data0->magic - data1->magic;
-                if(diff + currNumber <= 1024){
-                    currNumber += diff;
-                    currFormula.append(data0->locationid);
-                    currFormula.append(" - ");
-                    currFormula.append(data1->locationid);
-                    if (currNumber == 1024 && num >= 4){
-                        std::cout << "curr formula = " << currFormula << std::endl;
-                        if (PostFormula(currFormula) == 0){
-                            formulaScore += (num * num);
-                        }
-                        // 不管什么结果, 之前的全部不用了
-                        num = 0;
-                        currFormula.clear();
-                        currNumber = 0;
-                    }
-                    else{
-                        currFormula.append(" + ");
-                    }
-
-                    continue;
-                }
-
-                __int128_t division = data0->magic / data1->magic;
-                if (division + currNumber <= 1024){
-                    currNumber += division;
-                    currFormula.append(data0->locationid);
-                    currFormula.append(" / ");
-                    currFormula.append(data1->locationid);
-                    if (currNumber == 1024 && num >= 4){
-                        std::cout << "curr formula = " << currFormula << std::endl;
-                        if (PostFormula(currFormula) == 0){
-                            formulaScore += (num * num);
-                        }
-                        // 不管什么结果, 之前的全部不用了
-                        num = 0;
-                        currFormula.clear();
-                        currNumber = 0;
-                    }
-                    else{
-                        currFormula.append(" + ");
-                    }
-                }
-                else{
-                    currFormula.append(data1->locationid);
-                    currFormula.append(" / ");
-                    currFormula.append(data0->locationid);
                     currFormula.append(" + ");
                 }
             }
             else{
-                // 先尝试减法
-                __int128_t diff = data1->magic - data0->magic;
-                if(diff + currNumber <= 1024){
-                    currNumber += diff;
+                if (index >= realDatas->size()) {
+                    // 多线程程序, 这里continue不一定会退出上层while循环, 有可能此时正好其他线程的新数据来了;
+                    // 此时之前的data0就被跳过了, 但是也无所谓, 以后还会循环过来的.
+                    continue;
+                }
+
+                // 已经取了一个数出来, 这里不能再随意跳过了, 除非到最后, 否则必须找到一个来放公式中去
+                auto data1 = (*realDatas)[index++];
+                while (data1->flag != 0 || data1->magic == 0){
+                    // 如果这里发现已经到队尾了, 直接退出while, 后面的 if 会 continue 上一层 while
+                    if (index >= realDatas->size()) break;
+                    data1 = (*realDatas)[index++];
+                }
+                if (data1->flag != 0 || data1->magic == 0){
+                    continue;
+                }
+
+                if(data1->magic + currNumber <= 1024){
+                    ++num;
+                    currNumber += data1->magic;
                     currFormula.append(data1->locationid);
-                    currFormula.append(" - ");
-                    currFormula.append(data0->locationid);
+                    usedDatas[data1->locationid] = index - 1;
                     if (currNumber == 1024 && num >= 4){
                         std::cout << "curr formula = " << currFormula << std::endl;
-                        if (PostFormula(currFormula) == 0){
+                        FormulaResult result;
+                        int errorno = PostFormula(currFormula, result);
+                        if (errorno == 0){
+                            MarkUsedDatas();
                             formulaScore += (num * num);
                         }
-                        // 不管什么结果, 之前的全部不用了
+                        else if (errorno == 3){
+                            MarkAbandonedDatas(result.data);
+                        }
                         num = 0;
                         currFormula.clear();
                         currNumber = 0;
@@ -312,41 +277,148 @@ int main(int argc, char const *argv[]){
                     else{
                         currFormula.append(" + ");
                     }
-
                     continue;
                 }
 
-                __int128_t division = data1->magic / data0->magic;
-                if (division + currNumber <= 1024){
-                    currNumber += division;
-                    currFormula.append(data1->locationid);
-                    currFormula.append(" / ");
-                    currFormula.append(data0->locationid);
-                    if (currNumber == 1024 && num >= 4){
-                        std::cout << "curr formula = " << currFormula << std::endl;
-                        if (PostFormula(currFormula) == 0){
-                            formulaScore += (num * num);
+                // 到这里就必须把两个数一起处理了
+                num += 2;
+                usedDatas[data0->locationid] = index - 2;
+                usedDatas[data1->locationid] = index - 1;
+                if (data0->magic >= data1->magic){
+                    // 先尝试减法
+                    __int128_t diff = data0->magic - data1->magic;
+                    if(diff + currNumber <= 1024){
+                        currNumber += diff;
+                        currFormula.append(data0->locationid);
+                        currFormula.append(" - ");
+                        currFormula.append(data1->locationid);
+                        if (currNumber == 1024 && num >= 4){
+                            std::cout << "curr formula = " << currFormula << std::endl;
+                            FormulaResult result;
+                            int errorno = PostFormula(currFormula, result);
+                            if (errorno == 0){
+                                MarkUsedDatas();
+                                formulaScore += (num * num);
+                            }
+                            else if (errorno == 3){
+                                MarkAbandonedDatas(result.data);
+                            }
+                            num = 0;
+                            currFormula.clear();
+                            currNumber = 0;
                         }
-                        // 不管什么结果, 之前的全部不用了
-                        num = 0;
-                        currFormula.clear();
-                        currNumber = 0;
+                        else{
+                            currFormula.append(" + ");
+                        }
+
+                        continue;
+                    }
+
+                    __int128_t division = data0->magic / data1->magic;
+                    if (division + currNumber <= 1024){
+                        currNumber += division;
+                        currFormula.append(data0->locationid);
+                        currFormula.append(" / ");
+                        currFormula.append(data1->locationid);
+                        if (currNumber == 1024 && num >= 4){
+                            std::cout << "curr formula = " << currFormula << std::endl;
+                            FormulaResult result;
+                            int errorno = PostFormula(currFormula, result);
+                            if (errorno == 0){
+                                MarkUsedDatas();
+                                formulaScore += (num * num);
+                            }
+                            else if (errorno == 3){
+                                MarkAbandonedDatas(result.data);
+                            }
+                            num = 0;
+                            currFormula.clear();
+                            currNumber = 0;
+                        }
+                        else{
+                            currFormula.append(" + ");
+                        }
                     }
                     else{
+                        currFormula.append(data1->locationid);
+                        currFormula.append(" / ");
+                        currFormula.append(data0->locationid);
                         currFormula.append(" + ");
                     }
                 }
                 else{
-                    currFormula.append(data0->locationid);
-                    currFormula.append(" / ");
-                    currFormula.append(data1->locationid);
-                    currFormula.append(" + ");
+                    // 先尝试减法
+                    __int128_t diff = data1->magic - data0->magic;
+                    if(diff + currNumber <= 1024){
+                        currNumber += diff;
+                        currFormula.append(data1->locationid);
+                        currFormula.append(" - ");
+                        currFormula.append(data0->locationid);
+                        if (currNumber == 1024 && num >= 4){
+                            std::cout << "curr formula = " << currFormula << std::endl;
+                            FormulaResult result;
+                            int errorno = PostFormula(currFormula, result);
+                            if (errorno == 0){
+                                MarkUsedDatas();
+                                formulaScore += (num * num);
+                            }
+                            else if (errorno == 3){
+                                MarkAbandonedDatas(result.data);
+                            }
+                            num = 0;
+                            currFormula.clear();
+                            currNumber = 0;
+                        }
+                        else{
+                            currFormula.append(" + ");
+                        }
+
+                        continue;
+                    }
+
+                    __int128_t division = data1->magic / data0->magic;
+                    if (division + currNumber <= 1024){
+                        currNumber += division;
+                        currFormula.append(data1->locationid);
+                        currFormula.append(" / ");
+                        currFormula.append(data0->locationid);
+                        if (currNumber == 1024 && num >= 4){
+                            std::cout << "curr formula = " << currFormula << std::endl;
+                            FormulaResult result;
+                            int errorno = PostFormula(currFormula, result);
+                            if (errorno == 0){
+                                MarkUsedDatas();
+                                formulaScore += (num * num);
+                            }
+                            else if (errorno == 3){
+                                MarkAbandonedDatas(result.data);
+                            }
+                            num = 0;
+                            currFormula.clear();
+                            currNumber = 0;
+                        }
+                        else{
+                            currFormula.append(" + ");
+                        }
+                    }
+                    else{
+                        currFormula.append(data0->locationid);
+                        currFormula.append(" / ");
+                        currFormula.append(data1->locationid);
+                        currFormula.append(" + ");
+                    }
                 }
             }
         }
 
-        // 其他事情做完了, 就差最后一位数字, 直接退出不管了
-        if (pool->JobsCount() == 0 && ReadFileFinished()) break;
+        // 清理掉当前数据, 从头再来
+        index = 0;
+        num = 0;
+        currFormula.clear();
+        currNumber = 0;
+        usedDatas.clear();
+        // 其他事情做完了, 剩余数字不足4个, 直接退出不管了
+        if (pool->JobsCount() == 0 && ReadFileFinished() && usedCount >= realDatas->size() - 4) break;
         else usleep(1000000);                    // 睡１秒
     }
 

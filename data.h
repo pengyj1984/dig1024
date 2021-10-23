@@ -16,9 +16,10 @@ struct RealData{
     RealData(const std::string &_locationid, const __int128_t &_magic);
     std::string locationid;
     __int128_t magic;
+    int flag = 0;
 };
 
-RealData::RealData(const std::string &_locationid, const __int128_t &_magic):locationid(_locationid), magic(_magic){}
+RealData::RealData(const std::string &_locationid, const __int128_t &_magic):locationid(_locationid), magic(_magic), flag(0){}
 
 // 挖宝验证数据结构
 struct DigData{

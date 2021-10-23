@@ -58,7 +58,7 @@ inline int PostDig(const std::string &locationId){
     return 1;
 }
 
-inline int PostFormula(const std::string &formula){
+inline int PostFormula(const std::string &formula, FormulaResult &result){
     FormulaData data(formula, token);
     std::stringstream ss;
     ajson::save_to(ss, data);
@@ -96,7 +96,6 @@ inline int PostFormula(const std::string &formula){
 
     if (ret == CURLE_OK){
         std::cout << "formula result = " << response << std::endl;
-        FormulaResult result;
         ajson::load_from_buff(result, response.c_str(), response.size());
         return result.errorno;
     }

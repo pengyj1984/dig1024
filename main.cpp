@@ -112,7 +112,7 @@ void ReadFiles(int start, int step, int index, int threadIdx){
 
     std::string file;
     while(filePipes[index] < MAXFILENUMPERTHREAD){
-        file = "./Treasure_" + std::to_string(start) + ".data";
+        file = "./data/Treasure_" + std::to_string(start) + ".data";
         std::ifstream ifstream(file);
         if (ifstream.is_open()){
             std::string temp;

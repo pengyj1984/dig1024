@@ -149,10 +149,13 @@ bool ReadFileFinished(){
 
 // 2021.10.23
 void MarkUsedDatas(){
-    std::unordered_map<std::string, int>::iterator iter = usedDatas.begin();
-    while (iter != usedDatas.end()){
-        (*realDatas)[iter->second]->flag = 1;
-        ++iter;
+    {
+        std::scoped_lock<std::mutex> g(settleMutex);
+        std::unordered_map<std::string, int>::iterator iter = usedDatas.begin();
+        while (iter != usedDatas.end()){
+            (*realDatas)[iter->second]->flag = 1;
+            ++iter;
+        }
     }
 
     usedCount += usedDatas.size();
@@ -161,14 +164,17 @@ void MarkUsedDatas(){
 
 // 2021.10.23
 void MarkAbandonedDatas(std::vector<std::string> &vec){
-    std::vector<std::string>::iterator iter = vec.begin();
-    while (iter != vec.end()){
-        auto it = usedDatas.find(*iter);
-        if (it != usedDatas.end()){
-            (*realDatas)[it->second]->flag = 1;
+    {
+        std::scoped_lock<std::mutex> g(settleMutex);
+        std::vector<std::string>::iterator iter = vec.begin();
+        while (iter != vec.end()){
+            auto it = usedDatas.find(*iter);
+            if (it != usedDatas.end()){
+                (*realDatas)[it->second]->flag = 1;
+            }
+            ++iter;
+            ++usedCount;
         }
-        ++iter;
-        ++usedCount;
     }
     usedDatas.clear();
 }
